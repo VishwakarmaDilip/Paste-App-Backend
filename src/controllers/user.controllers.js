@@ -11,9 +11,9 @@ const generateAccessAndRefreshToken = async (userId) => {
         const refreshToken = user.generateRefreshToken()
 
         user.refreshToken = refreshToken
-        user.save({validateBeforeSave:false})
+        user.save({ validateBeforeSave: false })
 
-        return {accessToken, refreshToken}
+        return { accessToken, refreshToken }
     } catch (error) {
         throw new ApiError(
             500,
@@ -76,34 +76,34 @@ const registerUser = asyncHandler(async (req, res) => {
         )
 })
 
-const loginUser = asyncHandler(async(req,res) => {
+const loginUser = asyncHandler(async (req, res) => {
     // get data
-    const {email, username, password} = req.body
+    const { email, username, password } = req.body
 
     // check for username or email
-    if(!(username||email)) {
+    if (!(username || email)) {
         throw new ApiError(400, "username or email is required")
     }
 
     // find the User
     const user = await User.findOne({
-        $or:[{email},{username}],
+        $or: [{ email }, { username }],
 
     })
 
-    if(!user) {
+    if (!user) {
         throw new ApiError(404, "User does not exist")
     }
 
     // password check
     const isPasswordValid = await user.isPasswordCorrect(password)
 
-    if(!isPasswordValid){
+    if (!isPasswordValid) {
         throw new ApiError(402, "Invalid user credentials")
     }
 
     // generate access and refresh token
-    const {accessToken, refreshToken} = await generateAccessAndRefreshToken(user._id)
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user._id)
 
     // Send cookie response
     const loggedInUser = await User.findById(user._id).select(
@@ -111,36 +111,36 @@ const loginUser = asyncHandler(async(req,res) => {
     )
 
     const option = {
-        httpOnly : true,
+        httpOnly: true,
         secure: true
     }
 
 
     return res
         .status(200)
-        .cookie("accessToken", accessToken,option)
-        .cookie("accessToken", refreshToken,option)
+        .cookie("accessToken", accessToken, option)
+        .cookie("accessToken", refreshToken, option)
         .json(
             new ApiResponse(
                 200,
                 {
-                    user: loggedInUser, accessToken,refreshToken
+                    user: loggedInUser, accessToken, refreshToken
                 },
                 "User Logged In Successfully"
             )
         )
 })
 
-const logoutUser = asyncHandler(async(req,res) => {
+const logoutUser = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(
         req.user._id,
         {
-            $unset:{
-                refreshToken:1
+            $unset: {
+                refreshToken: 1
             }
         },
         {
-            new:true
+            new: true
         }
     )
 
@@ -156,9 +156,61 @@ const logoutUser = asyncHandler(async(req,res) => {
         .json(new ApiResponse(200, {}, "User Logged out"))
 })
 
+const changeCurrentPassword = asyncHandler(async (req, res) => {
+    const { oldPassword, newPassword } = req.body
+
+    const user = await User.findById(req.user?._id)
+
+    const isPasswordCorrect = await user.isPasswordCorrect(oldPassword)
+
+    if (!isPasswordCorrect) {
+        throw new ApiError(400, {}, "Invalid Old password")
+    }
+
+    user.password = newPassword
+
+    await user.save({ validateBeforeSave: false })
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, "Password changed successfully")
+        )
+
+
+})
+
+const updateAcountDetail = asyncHandler(async (req,res) => {
+    const {fullName, email} = req.body
+
+    if(!fullName && !email) {
+        throw new ApiError(400, "At least one feild is required..!!")
+    }
+
+    const user = await User.findOneAndUpdate(
+        req.user?._id,
+        {
+            $set: {
+                fullName,
+                email
+            }
+        },
+        {new: true}
+    ).select("-password")
+
+    return res  
+        .status(200)
+        .json(new ApiResponse(200,user,"Account detail updated successfully"))
+
+
+
+})
+
 
 export {
     registerUser,
     loginUser,
     logoutUser,
+    changeCurrentPassword,
+    updateAcountDetail,
 }
