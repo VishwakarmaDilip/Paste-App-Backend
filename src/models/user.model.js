@@ -31,12 +31,8 @@ const userSchema = new Schema(
         },
         myNotes: [
             {
-                notesId: {
-                    type: Schema.Types.ObjectId,
-                    ref: "Notes",
-                },
-                title: String,
-                content: String,
+                type: Schema.Types.ObjectId,
+                ref: "Note",
             },
         ],
         refreshToken: {

@@ -1,3 +1,4 @@
+import mongoose from "mongoose"
 import { User } from "../models/user.model.js"
 import { ApiError } from "../utils/apiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
@@ -206,6 +207,36 @@ const updateAcountDetail = asyncHandler(async (req,res) => {
 
 })
 
+const getUserNotes = asyncHandler(async (req, res) => {
+    const userId = req.user._id
+
+    const user = await User.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(userId)
+            }
+        },
+        {
+            $lookup:{
+                from: "notes",
+                localField: "_id",
+                foreignField: "creater",
+                as: "myNotes",
+            }
+        },
+    ])
+
+    return res 
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                user[0].myNotes,
+                "All notes fetched"
+            )
+        )
+
+})
 
 export {
     registerUser,
@@ -213,4 +244,5 @@ export {
     logoutUser,
     changeCurrentPassword,
     updateAcountDetail,
+    getUserNotes
 }
