@@ -42,14 +42,17 @@ const addNote = asyncHandler(async (req, res) => {
 
 const getNote = asyncHandler(async (req, res) => {
     // get note by id
-    const notId = req.params
+    const {noteId} = req.params
 
-    if (!notId) {
-        throw new ApiError(405, "not id is empty it is required")
+    // console.log(typeof (noteId));
+    
+
+    if (!noteId) {
+        throw new ApiError(405, "note id is empty it is required")
     }
 
     // find id in db and update
-    const note = await Note.findById(notId)
+    const note = await Note.findById(noteId)    
 
     if (!note) {
         throw new ApiError(505, "note not found with this id")
@@ -67,7 +70,7 @@ const getNote = asyncHandler(async (req, res) => {
 
 const updateNote = asyncHandler(async (req, res) => {
     // get data like note id , titke and content
-    const noteId = req.params
+    const {noteId} = req.params
     let { title, content } = req.body
 
     // veryfy data
@@ -115,7 +118,7 @@ const updateNote = asyncHandler(async (req, res) => {
 
 const deleteNote = asyncHandler(async (req, res) => {
     // get note id 
-    const noteId = req.params
+    const {noteId} = req.params
 
     if (!noteId) {
         throw new ApiError(400, "note id is empty")
@@ -123,6 +126,13 @@ const deleteNote = asyncHandler(async (req, res) => {
 
     // find and delete from db
     const deletedNote = await Note.findByIdAndDelete(noteId)
+    const user = await User.findById(req.user?._id)
+
+    const indexOfDeletedNote = user.myNotes.findIndex(note => note === noteId)
+
+    user.myNotes.splice(indexOfDeletedNote,1)
+
+    await user.save()
 
     // send response
     return res
