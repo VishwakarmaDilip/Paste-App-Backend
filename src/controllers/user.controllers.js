@@ -26,7 +26,7 @@ const generateAccessAndRefreshToken = async (userId) => {
 
 const registerUser = asyncHandler(async (req, res) => {
     // get user detail    
-    const { fullName, email, username, password } = req.body
+    const { fullName, email, username, password } = req.body    
 
     // validate - not empty
     let isEmpty = [fullName, email, username, password]
@@ -46,7 +46,7 @@ const registerUser = asyncHandler(async (req, res) => {
     )
 
     if (existedUser) {
-        throw new ApiError(400, "user with Email or Username already exists")
+        throw new ApiError(401, "user with Email or Username already exists")
     }
 
     // create user object - create entry in DB
