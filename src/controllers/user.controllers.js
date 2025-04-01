@@ -35,7 +35,7 @@ const registerUser = asyncHandler(async (req, res) => {
     })
 
     if (isEmpty) {
-        throw new ApiError(400, "All feilds Required")
+        throw new ApiError(406, "All feilds Required")
     }
 
     // check if user already exist: username, email
@@ -46,7 +46,7 @@ const registerUser = asyncHandler(async (req, res) => {
     )
 
     if (existedUser) {
-        throw new ApiError(401, "user with Email or Username already exists")
+        throw new ApiError(409, "user with Email or Username already exists")
     }
 
     // create user object - create entry in DB
@@ -83,7 +83,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
     // check for username or email
     if (!identifier) {
-        throw new ApiError(402, "username or email is required")
+        throw new ApiError(406, "username or email is required")
     }
 
     // find the User
@@ -100,7 +100,7 @@ const loginUser = asyncHandler(async (req, res) => {
     const isPasswordValid = await user.isPasswordCorrect(password)
 
     if (!isPasswordValid) {
-        throw new ApiError(402, "Invalid user credentials")
+        throw new ApiError(401, "Invalid user credentials")
     }
 
     // generate access and refresh token
@@ -167,7 +167,7 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
     const isPasswordCorrect = await user.isPasswordCorrect(oldPassword)
 
     if (!isPasswordCorrect) {
-        throw new ApiError(400, {}, "Invalid Old password")
+        throw new ApiError(401, {}, "Invalid Old password")
     }
 
     user.password = newPassword
@@ -187,7 +187,7 @@ const updateAcountDetail = asyncHandler(async (req,res) => {
     const {fullName, email} = req.body
 
     if(!fullName && !email) {
-        throw new ApiError(400, "At least one feild is required..!!")
+        throw new ApiError(406, "At least one feild is required..!!")
     }
 
     const user = await User.findOneAndUpdate(

@@ -9,7 +9,13 @@ const addNote = asyncHandler(async (req, res) => {
     const userId = req.user._id
 
     if (!title || !content) {
-        throw new ApiError(404, "All Feild required")
+        throw new ApiError(406, "All Feild required")
+    }
+
+    const isExist = await Note.findOne({content})
+
+    if (isExist) {
+        throw new ApiError(409, "Note Already Exist")
     }
 
     const note = await Note.create(
@@ -21,7 +27,7 @@ const addNote = asyncHandler(async (req, res) => {
     )
 
     if (!note) {
-        throw new ApiError(501, "Something wnet wrong while creating Note..!")
+        throw new ApiError(500, "Something wnet wrong while creating Note..!")
     }
 
     const user = await User.findById(userId)
