@@ -224,8 +224,14 @@ const getUserNotes = asyncHandler(async (req, res) => {
                 localField: "_id",
                 foreignField: "creater",
                 as: "myNotes",
+                pipeline:[
+                    {
+                        $unset: "creater"
+                    }
+                ]
             }
         },
+        
     ])
 
     return res 

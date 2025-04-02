@@ -61,7 +61,7 @@ const getNote = asyncHandler(async (req, res) => {
     const note = await Note.findById(noteId)    
 
     if (!note) {
-        throw new ApiError(505, "note not found with this id")
+        throw new ApiError(404, "note not found with this id")
     }
 
     // send response
@@ -149,7 +149,6 @@ const deleteNote = asyncHandler(async (req, res) => {
             "Note deleted successfully"
         ))
 })
-
 
 
 export {
