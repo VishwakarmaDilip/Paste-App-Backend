@@ -50,6 +50,7 @@ const getNote = asyncHandler(async (req, res) => {
     // get note by id
     const {noteId} = req.params
 
+    // console.log(noteId);
     // console.log(typeof (noteId));
     
 
@@ -75,7 +76,7 @@ const getNote = asyncHandler(async (req, res) => {
 })
 
 const updateNote = asyncHandler(async (req, res) => {
-    // get data like note id , titke and content
+    // get data like note id , title and content
     const {noteId} = req.params
     let { title, content } = req.body
 
