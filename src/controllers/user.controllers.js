@@ -114,7 +114,8 @@ const loginUser = asyncHandler(async (req, res) => {
     const option = {
         httpOnly: true,
         secure: true,
-        // sameSite: "None"
+        sameSite: "None",
+        path:"/"
     }
 
 
@@ -246,11 +247,23 @@ const getUserNotes = asyncHandler(async (req, res) => {
 
 })
 
+const getCurrentUser = asyncHandler(async (req, res) => {
+    if (!req.user) {
+        throw ApiError(404, "User Not Found")
+    }
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, req.user, "Current User Fetched Successfully"))
+})
+
+
 export {
     registerUser,
     loginUser,
     logoutUser,
     changeCurrentPassword,
     updateAcountDetail,
-    getUserNotes
+    getUserNotes,
+    getCurrentUser
 }
