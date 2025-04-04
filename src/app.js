@@ -5,9 +5,16 @@ import cookieParser from "cookie-parser"
 
 const app = express()
 
+const whiteList = process.env.CORS_ORIGIN_WHITELIST
+
 app.use(cors({
-    origin: process.env.CORS_ORIGIN,
-    // methods:"GET, POST, PUT, DELETE, PATCH, HEAD",
+    origin: function(origin, callback) {
+        if (!origin || whiteList.includes(origin)) {
+            callback(null, true)
+        }else {
+            callback(new Error("Not allowed by CORS"))
+        }
+    },
     credentials: true
 }))
 
