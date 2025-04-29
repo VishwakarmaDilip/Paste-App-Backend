@@ -185,9 +185,9 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 })
 
 const updateAcountDetail = asyncHandler(async (req,res) => {
-    const {fullName, email} = req.body
+    const {fullName, gender, age, mobile} = req.body
 
-    if(!fullName && !email) {
+    if(!fullName && !age && gender && !mobile) {
         throw new ApiError(406, "At least one feild is required..!!")
     }
 
@@ -196,7 +196,9 @@ const updateAcountDetail = asyncHandler(async (req,res) => {
         {
             $set: {
                 fullName,
-                email
+                gender,
+                age,
+                mobile
             }
         },
         {new: true}
