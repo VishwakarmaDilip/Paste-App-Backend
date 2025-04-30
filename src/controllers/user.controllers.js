@@ -3,6 +3,7 @@ import { User } from "../models/user.model.js"
 import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import asyncHandler from "../utils/asyncHandler.js"
+import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/Cloudinary.js"
 
 
 const generateAccessAndRefreshToken = async (userId) => {
@@ -207,9 +208,38 @@ const updateAcountDetail = asyncHandler(async (req,res) => {
     return res  
         .status(200)
         .json(new ApiResponse(200,user,"Account detail updated successfully"))
+})
 
+const updateAvatarAndEmail = asyncHandler(async (req, res) => {
+    const { email} = req.body
+    const avatarLocalPath = req?.file?.path
+    const user = await User.findById(req.user._id)
+    const oldAvatar = user?.avatar
+ 
+    if (email) {
+        user.email = email
 
+        await user.save({ validateBeforeSave: false })
+    }
 
+    if (avatarLocalPath) {
+        const avatar = await uploadOnCloudinary(avatarLocalPath)
+
+        if (!avatar) {
+            throw new ApiError(406, "Something went wrong while uploading the image")
+        }
+
+        user.avatar = avatar
+        await user.save({ validateBeforeSave: false })
+    }
+
+    if (oldAvatar) {
+        await deleteFromCloudinary(oldAvatar)
+    }
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, user, "User detail updated successfully"))
 })
 
 const getUserNotes = asyncHandler(async (req, res) => {
@@ -267,5 +297,6 @@ export {
     changeCurrentPassword,
     updateAcountDetail,
     getUserNotes,
-    getCurrentUser
+    getCurrentUser,
+    updateAvatarAndEmail
 }
