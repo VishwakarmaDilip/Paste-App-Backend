@@ -4,24 +4,27 @@ import { ApiError } from './ApiError.js';
 
 // Configure Cloudinary
 cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    cloud_name: process.env.CLOUDINARY_API_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 // Upload
 const uploadOnCloudinary = async (localFilePath) => {
-    try {
+    try {        
         if (!localFilePath) return null;
 
-        // upload image to cloudinary
+        // upload image to cloudinary    
         const response = await cloudinary.uploader.upload(localFilePath, {
-            resource_type: 'auto',
+            resource_type: 'image',
         })
+
         fs.unlinkSync(localFilePath); // delete local file after upload
         return response.secure_url; // return the URL of the uploaded image
     } catch (error) {
         fs.unlinkSync(localFilePath); // delete local file in case of error
+        console.log("Error uploading to Cloudinary:", error.message);
+        
         return null
     }
 }

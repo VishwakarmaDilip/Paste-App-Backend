@@ -27,7 +27,7 @@ const generateAccessAndRefreshToken = async (userId) => {
 
 const registerUser = asyncHandler(async (req, res) => {
     // get user detail    
-    const { fullName, email, username, password } = req.body    
+    const { fullName, email, username, password } = req.body
 
     // validate - not empty
     let isEmpty = [fullName, email, username, password]
@@ -89,7 +89,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
     // find the User
     const user = await User.findOne({
-        $or: [{ email:identifier }, { username:identifier }],
+        $or: [{ email: identifier }, { username: identifier }],
 
     })
 
@@ -116,7 +116,7 @@ const loginUser = asyncHandler(async (req, res) => {
         httpOnly: true,
         secure: true,
         sameSite: "None",
-        path:"/"
+        path: "/"
     }
 
 
@@ -185,10 +185,10 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 
 })
 
-const updateAcountDetail = asyncHandler(async (req,res) => {
-    const {fullName, gender, age, mobile} = req.body
+const updateAcountDetail = asyncHandler(async (req, res) => {
+    const { fullName, gender, age, mobile } = req.body
 
-    if(!fullName && !age && gender && !mobile) {
+    if (!fullName && !age && gender && !mobile) {
         throw new ApiError(406, "At least one feild is required..!!")
     }
 
@@ -202,24 +202,27 @@ const updateAcountDetail = asyncHandler(async (req,res) => {
                 mobile
             }
         },
-        {new: true}
+        { new: true }
     ).select("-password")
 
-    return res  
+    return res
         .status(200)
-        .json(new ApiResponse(200,user,"Account detail updated successfully"))
+        .json(new ApiResponse(200, user, "Account detail updated successfully"))
 })
 
 const updateAvatarAndEmail = asyncHandler(async (req, res) => {
-    const { email} = req.body
+    const { email } = req.body
     const avatarLocalPath = req?.file?.path
     const user = await User.findById(req.user._id)
     const oldAvatar = user?.avatar
- 
+
+    let upbhogta
+
     if (email) {
         user.email = email
 
         await user.save({ validateBeforeSave: false })
+        upbhogta = await User.findById(user._id).select("-password -refreshToken")
     }
 
     if (avatarLocalPath) {
@@ -231,6 +234,7 @@ const updateAvatarAndEmail = asyncHandler(async (req, res) => {
 
         user.avatar = avatar
         await user.save({ validateBeforeSave: false })
+        upbhogta = await User.findById(user._id).select("-password -refreshToken")
     }
 
     if (oldAvatar) {
@@ -239,7 +243,7 @@ const updateAvatarAndEmail = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .json(new ApiResponse(200, user, "User detail updated successfully"))
+        .json(new ApiResponse(200,upbhogta, "User detail updated successfully"))
 })
 
 const getUserNotes = asyncHandler(async (req, res) => {
@@ -252,22 +256,22 @@ const getUserNotes = asyncHandler(async (req, res) => {
             }
         },
         {
-            $lookup:{
+            $lookup: {
                 from: "notes",
                 localField: "_id",
                 foreignField: "creater",
                 as: "myNotes",
-                pipeline:[
+                pipeline: [
                     {
                         $unset: "creater"
                     }
                 ]
             }
         },
-        
+
     ])
 
-    return res 
+    return res
         .status(200)
         .json(
             new ApiResponse(
@@ -281,7 +285,7 @@ const getUserNotes = asyncHandler(async (req, res) => {
 
 const getCurrentUser = asyncHandler(async (req, res) => {
     if (!req.user) {
-        throw ApiError(404, "User Not Found")
+        throw new ApiError(404, "User Not Found")
     }
 
     return res

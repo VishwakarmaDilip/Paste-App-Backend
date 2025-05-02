@@ -18,6 +18,9 @@ const userSchema = new Schema(
             trim: true,
             index: true,
         },
+        avatar: {
+            type: String,
+        },
         age: {
             type: Number,
         },
