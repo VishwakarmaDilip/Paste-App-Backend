@@ -226,6 +226,7 @@ const updateAvatarAndEmail = asyncHandler(async (req, res) => {
     }
 
     if (avatarLocalPath) {
+        
         const avatar = await uploadOnCloudinary(avatarLocalPath)
 
         if (!avatar) {
