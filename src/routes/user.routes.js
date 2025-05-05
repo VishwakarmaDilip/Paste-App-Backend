@@ -20,7 +20,7 @@ router.route("/login").post(loginUser);
 // secured routes
 router.route("/currentUser").get(verifyJWT,getCurrentUser)
 router.route("/logout").post(verifyJWT, logoutUser);
-router.route("/changePassword").post(verifyJWT, changeCurrentPassword)
+router.route("/changePassword").patch(verifyJWT, changeCurrentPassword)
 router.route("/updateAccount").patch(verifyJWT,updateAcountDetail)
 router.route("/getUserNotes").get(verifyJWT,getUserNotes)
 router.route("/updateAvatarAndEmail").patch(verifyJWT,upload.single("avatar"),updateAvatarAndEmail)

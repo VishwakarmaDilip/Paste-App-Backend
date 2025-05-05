@@ -164,6 +164,8 @@ const logoutUser = asyncHandler(async (req, res) => {
 const changeCurrentPassword = asyncHandler(async (req, res) => {
     const { oldPassword, newPassword } = req.body
 
+    console.log("oldPassword", oldPassword);
+
     const user = await User.findById(req.user?._id)
 
     const isPasswordCorrect = await user.isPasswordCorrect(oldPassword)
@@ -176,8 +178,28 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 
     await user.save({ validateBeforeSave: false })
 
+    await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $unset: {
+                refreshToken: 1
+            }
+        },
+        {
+            new: true
+        }
+    )
+
+    const option = {
+        httpOnly: true,
+        secure: true,
+        // sameSite: "None",
+    }
+
     return res
         .status(200)
+        .clearCookie("accessToken", option)
+        .clearCookie("refreshToken", option)
         .json(
             new ApiResponse(200, "Password changed successfully")
         )
@@ -226,7 +248,7 @@ const updateAvatarAndEmail = asyncHandler(async (req, res) => {
     }
 
     if (avatarLocalPath) {
-        
+
         const avatar = await uploadOnCloudinary(avatarLocalPath)
 
         if (!avatar) {
@@ -244,7 +266,7 @@ const updateAvatarAndEmail = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .json(new ApiResponse(200,upbhogta, "User detail updated successfully"))
+        .json(new ApiResponse(200, upbhogta, "User detail updated successfully"))
 })
 
 const getUserNotes = asyncHandler(async (req, res) => {
